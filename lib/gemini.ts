@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildUserPrompt, SYSTEM_PROMPT } from "./prompts";
 
-const MODEL = "gemini-1.5-pro";
+const MODEL = "gemini-1.5-pro-latest";
 
 let client: GoogleGenerativeAI | null = null;
 
@@ -42,7 +42,14 @@ export async function generateScript(
   const result = await model.generateContent(fullPrompt);
 
   const text = result.response.text();
-  const parsed = JSON.parse(text) as ScriptResult;
+  
+  // Clean markdown code blocks if AI accidentally includes them
+  const cleanJsonString = text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+  
+  const parsed = JSON.parse(cleanJsonString) as ScriptResult;
 
   if (!parsed.hook || !parsed.body_content) {
     throw new Error("Invalid script format from Gemini");

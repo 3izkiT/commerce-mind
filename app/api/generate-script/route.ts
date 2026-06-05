@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateScript } from "@/lib/gemini";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { isProductUrl, isValidProductInput } from "@/lib/product-input";
 import { resolveProductInput } from "@/lib/product-resolver";
 
@@ -54,12 +54,58 @@ export async function POST(request: Request) {
       }
     }
 
-    const data = await generateScript(
-      resolved.text,
-      communicationGoal,
-      tone,
-      resolved.source === "url" ? resolved.originalUrl : undefined
+    // Initialize Gemini with latest stable model
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+
+    const systemInstruction = `
+คุณคือผู้เชี่ยวชาญสคริปต์วิดีโอสั้นขายของสำหรับแม่ค้า/ครีเอเตอร์ไทยบน TikTok, Reels, Shorts
+
+กฎสำคัญ:
+1. ตอบเป็น JSON เท่านั้น ไม่มี markdown ไม่มีคำอธิบายเพิ่ม
+2. รูปแบบ: {"hook": "...", "body_content": "..."}
+3. ใช้ภาษาพูดแม่ค้าตลาดนัด ห้ามภาษาเขียน ห้ามคำเกริ่นนำ เช่น "สวัสดีค่ะวันนี้มาแนะนำ"
+4. hook: ประโยคเปิดที่ดึงดูดความสนใจใน 3 วินาทีแรก สั้น กระชับ ตรงประเด็น
+5. body_content: เนื้อหาหลักสคริปต์ ต้องมี [วงเล็บกำกับท่าทาง/การแสดง] เช่น [หยิบสินค้าขึ้นโชว์ใกล้กล้อง] [ชี้ที่จุดเด่น] [ยิ้มมองกล้อง]
+6. โทนเสียง 3 แบบ:
+   - สายตะโกนเร่งรีบ: ใช้คำเร่งด่วน สร้าง FOMO กระตุ้นให้รีบซื้อ
+   - สายป้ายยาเนียนๆ: แนะนำเหมือนเพื่อน ไม่ขายตรง เน้นประสบการณ์จริง
+   - สายฮาตลกร้าย: ใส่อารมณ์ขัน มุกตลก แต่ยังขายของได้
+7. เน้นประโยชน์สินค้า จุดเด่น ราคา โปรโม ตามข้อมูลที่ได้รับ
+8. ความยาว hook ไม่เกิน 2 ประโยค, body_content ประมาณ 150-300 คำ
+`;
+
+    const userPrompt = `สร้างสคริปต์วิดีโอสั้นขายของจากข้อมูลนี้:
+
+รายละเอียดสินค้า:
+${resolved.text}
+
+เป้าหมายการสื่อสาร: ${communicationGoal}
+
+โทนเสียง: ${tone}
+
+ตอบเป็น JSON เท่านั้น: {"hook": "...", "body_content": "..."}`;
+
+    const result = await model.generateContent(
+      systemInstruction + "\n\n" + userPrompt
     );
+
+    const responseText = result.response.text();
+
+    // Clean markdown code blocks if AI accidentally includes them
+    const cleanJsonString = responseText
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    const data = JSON.parse(cleanJsonString);
+
+    if (!data.hook || !data.body_content) {
+      return NextResponse.json(
+        { success: false, error: "Invalid script format from AI" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
