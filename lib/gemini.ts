@@ -28,13 +28,18 @@ export async function generateScript(
   sourceUrl?: string
 ): Promise<ScriptResult> {
   const genAI = getClient();
-  const model = genAI.getGenerativeModel({
-    model: MODEL,
-    systemInstruction: SYSTEM_PROMPT,
-    generationConfig: {
-      responseMimeType: "application/json",
+  const model = genAI.getGenerativeModel(
+    {
+      model: MODEL,
+      systemInstruction: SYSTEM_PROMPT,
+      generationConfig: {
+        responseMimeType: "application/json",
+      },
     },
-  });
+    {
+      apiVersion: "v1",
+    }
+  );
 
   const promptInput = sourceUrl
     ? `${productDetails}\n(ข้อมูลสินค้าดึงมาจากลิงก์: ${sourceUrl})`
