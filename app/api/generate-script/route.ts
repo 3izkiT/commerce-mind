@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateScript } from "@/lib/gemini";
-import { isValidProductInput } from "@/lib/product-input";
+import { isProductUrl, isValidProductInput } from "@/lib/product-input";
 import { resolveProductInput } from "@/lib/product-resolver";
 
 const SCRAPE_ERROR_TH =
@@ -44,16 +44,21 @@ export async function POST(request: Request) {
       resolved = await resolveProductInput(productDetails);
     } catch (error) {
       console.error("Product resolve error:", error);
-      return NextResponse.json(
-        { success: false, error: SCRAPE_ERROR_TH },
-        { status: 422 }
-      );
+      if (isProductUrl(productDetails)) {
+        resolved = { text: productDetails, source: "url", originalUrl: productDetails };
+      } else {
+        return NextResponse.json(
+          { success: false, error: SCRAPE_ERROR_TH },
+          { status: 422 }
+        );
+      }
     }
 
     const data = await generateScript(
       resolved.text,
       communicationGoal,
-      tone
+      tone,
+      resolved.source === "url" ? resolved.originalUrl : undefined
     );
 
     return NextResponse.json({ success: true, data });

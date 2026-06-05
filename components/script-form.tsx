@@ -69,7 +69,7 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
           name="productDetails"
           value={productDetails}
           onChange={(e) => setProductDetails(e.target.value)}
-          placeholder="วางลิงก์สินค้า (TikTok Shop / Shopee) หรือพิมพ์รายละเอียดจุดเด่นของสินค้าที่นี่..."
+          placeholder="วางลิงก์สินค้า (TikTok Shop / Shopee) หรือพิมพ์รายละเอียดจุดเด่นสินค้าได้ในช่องเดียวกัน"
           disabled={loading || disabled}
           className="min-h-[200px] resize-none rounded-[1.75rem] border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-950 transition-colors duration-200 focus-visible:border-zinc-950 focus-visible:ring-1 focus-visible:ring-zinc-950"
         />
