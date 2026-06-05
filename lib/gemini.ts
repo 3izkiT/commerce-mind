@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildUserPrompt, SYSTEM_PROMPT } from "./prompts";
 
-const MODEL = "gemini-1.5-pro-001";
+const MODEL = "gemini-1.5-pro";
 
 let client: GoogleGenerativeAI | null = null;
 
@@ -24,7 +24,8 @@ export interface ScriptResult {
 export async function generateScript(
   productDetails: string,
   communicationGoal: string,
-  tone: string
+  tone: string,
+  sourceUrl?: string
 ): Promise<ScriptResult> {
   const genAI = getClient();
   const model = genAI.getGenerativeModel({
@@ -36,7 +37,7 @@ export async function generateScript(
   });
 
   const result = await model.generateContent(
-    buildUserPrompt(productDetails, communicationGoal, tone)
+    buildUserPrompt(productDetails, communicationGoal, tone, sourceUrl)
   );
 
   const text = result.response.text();
