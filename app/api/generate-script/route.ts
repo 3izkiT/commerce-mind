@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { generateScript } from "@/lib/gemini";
+import { isValidProductInput } from "@/lib/product-input";
+import { resolveProductInput } from "@/lib/product-resolver";
+
+const SCRAPE_ERROR_TH =
+  "ไม่สามารถดึงข้อมูลจากลิงก์ได้ กรุณาพิมพ์รายละเอียดสินค้าแทน";
 
 export async function POST(request: Request) {
   try {
@@ -16,9 +21,13 @@ export async function POST(request: Request) {
     const communicationGoal = body.communicationGoal ?? "conversion";
     const tone = body.tone ?? "urgent";
 
-    if (productDetails.length < 10) {
+    if (!isValidProductInput(productDetails)) {
       return NextResponse.json(
-        { success: false, error: "productDetails must be at least 10 characters" },
+        {
+          success: false,
+          error:
+            "กรุณาวางลิงก์สินค้าที่ถูกต้อง หรือพิมพ์รายละเอียดอย่างน้อย 10 ตัวอักษร",
+        },
         { status: 400 }
       );
     }
@@ -30,7 +39,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = await generateScript(productDetails, communicationGoal, tone);
+    let resolved;
+    try {
+      resolved = await resolveProductInput(productDetails);
+    } catch (error) {
+      console.error("Product resolve error:", error);
+      return NextResponse.json(
+        { success: false, error: SCRAPE_ERROR_TH },
+        { status: 422 }
+      );
+    }
+
+    const data = await generateScript(
+      resolved.text,
+      communicationGoal,
+      tone
+    );
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

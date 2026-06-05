@@ -24,8 +24,7 @@ export interface ScriptResult {
 export async function generateScript(
   productDetails: string,
   communicationGoal: string,
-  tone: string,
-  sourceUrl?: string
+  tone: string
 ): Promise<ScriptResult> {
   const genAI = getClient();
   const model = genAI.getGenerativeModel({
@@ -37,7 +36,7 @@ export async function generateScript(
   });
 
   const result = await model.generateContent(
-    buildUserPrompt(productDetails, communicationGoal, tone, sourceUrl)
+    buildUserPrompt(productDetails, communicationGoal, tone)
   );
 
   const text = result.response.text();
