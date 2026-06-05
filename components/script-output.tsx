@@ -28,7 +28,7 @@ function HookTypewriter({ text }: { text: string }) {
   const words = text.split(" ");
 
   return (
-    <p className="text-lg font-medium leading-relaxed text-zinc-950">
+    <p className="text-lg font-medium leading-relaxed text-zinc-950 dark:text-slate-100">
       {words.map((word, i) => (
         <span
           key={i}
@@ -106,10 +106,10 @@ export function ScriptOutput({
   if (loading) {
     return (
       <div className="flex h-full flex-col gap-5">
-        <Skeleton className="h-6 w-56 rounded-lg bg-zinc-100" />
-        <Skeleton className="h-24 w-full rounded-xl bg-zinc-100" />
-        <Skeleton className="h-6 w-40 rounded-lg bg-zinc-100" />
-        <Skeleton className="h-52 w-full rounded-xl bg-zinc-100" />
+        <Skeleton className="h-6 w-56 rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+        <Skeleton className="h-24 w-full rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+        <Skeleton className="h-6 w-40 rounded-lg bg-zinc-100 dark:bg-zinc-800" />
+        <Skeleton className="h-52 w-full rounded-xl bg-zinc-100 dark:bg-zinc-800" />
         <div className="flex items-center justify-center gap-2 pt-4 text-sm text-slate-400">
           <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-zinc-200 border-t-accent-blue" />
           กำลังเสกสคริปต์...
@@ -120,18 +120,18 @@ export function ScriptOutput({
 
   if (!script) {
     return (
-      <div className="flex h-full flex-col items-center justify-center rounded-[1.5rem] border border-zinc-200 bg-white/90 p-8 text-center shadow-[0_24px_80px_rgba(15,23,42,0.05)]">
-        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-zinc-100 text-zinc-500 shadow-inner">
+      <div className="flex h-full flex-col items-center justify-center rounded-[1.5rem] border border-zinc-200 bg-white/90 p-8 text-center shadow-[0_24px_80px_rgba(15,23,42,0.05)] dark:border-zinc-800 dark:bg-zinc-950/95 dark:shadow-[0_24px_80px_rgba(0,0,0,0.18)]">
+        <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-zinc-100 text-zinc-500 shadow-inner dark:bg-zinc-900 dark:text-slate-400">
           <Brain className="h-8 w-8" />
         </div>
-        <h3 className="text-2xl font-semibold tracking-tight text-zinc-950">
+        <h3 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-slate-100">
           สคริปต์พร้อมใช้งานจะแสดงที่นี่
         </h3>
-        <p className="mt-4 max-w-xl text-sm leading-8 text-slate-500">
+        <p className="mt-4 max-w-xl text-sm leading-8 text-slate-500 dark:text-slate-400">
           กรอกรายละเอียดสินค้าด้านซ้ายเพื่อรับประโยค Hook เปิดหัวฟรี!
           และปลดล็อกเนื้อหา Body ตัวเต็มด้วยระบบสแกน PromptPay อัตโนมัติ
         </p>
-        <p className="mt-6 rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <p className="mt-6 rounded-full bg-slate-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 dark:bg-zinc-900 dark:text-slate-400">
           ระบุข้อมูลด้านซ้าย เพื่อเริ่มเสกคำขายเงินล้าน
         </p>
       </div>
@@ -162,23 +162,23 @@ export function ScriptOutput({
             Body
           </span>
           {!isPaid && (
-            <span className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500">
+            <span className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-500 dark:bg-zinc-900 dark:text-slate-400">
               <Lock className="h-3 w-3" />
               ล็อกอยู่
             </span>
           )}
         </div>
 
-        <div className="relative min-h-[220px] overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-slate-50/80 p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)]">
+        <div className="relative min-h-[220px] overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-slate-50/80 p-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] dark:border-zinc-800 dark:bg-zinc-950/95 dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]">
           <div
             className={cn(
               "absolute inset-0 transition-all duration-500",
-              !isPaid ? "bg-white/70 backdrop-blur-sm" : "bg-transparent",
+              !isPaid ? "bg-white/70 backdrop-blur-sm dark:bg-zinc-950/70" : "bg-transparent",
               unlocking && "glass-melt"
             )}
           />
           <div className={cn("relative transition-all duration-500", !isPaid && "blur-sm", isPaid && "body-unlock")}>            
-            <p className="whitespace-pre-wrap text-base leading-8 text-zinc-900">
+            <p className="whitespace-pre-wrap text-base leading-8 text-zinc-900 dark:text-slate-100">
               {script.body_content}
             </p>
           </div>
@@ -191,20 +191,20 @@ export function ScriptOutput({
                 paywallExiting && "paywall-exit pointer-events-none"
               )}
             >
-              <div className="w-full max-w-md rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl">
+              <div className="w-full max-w-md rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/95 dark:shadow-[0_30px_80px_rgba(0,0,0,0.22)]">
                 <div className="flex flex-col items-center gap-5 text-center">
                   {qrImageUrl ? (
                     <>
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-zinc-950 shadow-sm">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-zinc-950 shadow-sm dark:bg-zinc-900 dark:text-slate-200">
                         <QrCode className="h-6 w-6" />
                       </div>
-                      <p className="text-base font-semibold leading-snug text-zinc-950">
+                      <p className="text-base font-semibold leading-snug text-zinc-950 dark:text-slate-100">
                         สแกน PromptPay {PRICES.single}.- เพื่อรับชุดสคริปต์ปิดการขายฉบับเต็ม
                       </p>
                       <div className="qr-frame-pulse relative rounded-3xl border-2 border-zinc-950 p-4">
                         <span className="corner-tr" aria-hidden />
                         <span className="corner-bl" aria-hidden />
-                        <div className="relative h-44 w-44 overflow-hidden rounded-2xl bg-white">
+                        <div className="relative h-44 w-44 overflow-hidden rounded-2xl bg-white dark:bg-zinc-950">
                           <Image
                             src={qrImageUrl}
                             alt="PromptPay QR Code"
@@ -223,13 +223,13 @@ export function ScriptOutput({
                     </>
                   ) : (
                     <>
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-zinc-500 shadow-sm">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-zinc-500 shadow-sm dark:bg-zinc-900 dark:text-slate-400">
                         <Lock className="h-6 w-6" />
                       </div>
-                      <p className="text-base font-semibold leading-snug text-zinc-950">
+                      <p className="text-base font-semibold leading-snug text-zinc-950 dark:text-slate-100">
                         สแกน PromptPay {PRICES.single}.- เพื่อรับชุดสคริปต์ปิดการขายฉบับเต็ม
                       </p>
-                      <p className="max-w-sm text-sm leading-relaxed text-slate-500">
+                      <p className="max-w-sm text-sm leading-relaxed text-slate-500 dark:text-slate-400">
                         ชำระเงินครั้งเดียว จบในรอบ ไม่มีข้อผูกมัดรายเดือน ปลดล็อกเนื้อหาตัวเต็มทันที
                       </p>
                       <Button

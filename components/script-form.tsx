@@ -47,21 +47,21 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
   return (
     <form onSubmit={handleSubmit} className="flex h-full flex-col gap-8">
       <div className="flex items-start gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-950">
-          <span className="text-sm font-bold text-white">ค</span>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-950 dark:bg-zinc-100">
+          <span className="text-sm font-bold text-white dark:text-zinc-950">ค</span>
         </div>
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-zinc-950">
+          <h2 className="text-lg font-bold tracking-tight text-zinc-950 dark:text-slate-100">
             คิดคำขาย.com
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-400 dark:text-slate-400/80">
             ระบบจับคู่บริบทพาณิชย์และจิตวิทยาการขาย
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="productDetails" className="text-sm font-medium text-zinc-950">
+        <Label htmlFor="productDetails" className="text-sm font-medium text-zinc-950 dark:text-slate-100">
           รายละเอียดสินค้า *
         </Label>
         <Textarea
@@ -71,12 +71,12 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
           onChange={(e) => setProductDetails(e.target.value)}
           placeholder="วางลิงก์สินค้า (TikTok Shop / Shopee) หรือพิมพ์รายละเอียดจุดเด่นสินค้าได้ในช่องเดียวกัน"
           disabled={loading || disabled}
-          className="min-h-[200px] resize-none rounded-[1.75rem] border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-950 transition-colors duration-200 focus-visible:border-zinc-950 focus-visible:ring-1 focus-visible:ring-zinc-950"
+          className="min-h-[200px] resize-none rounded-[1.75rem] border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-950 transition-colors duration-200 focus-visible:border-zinc-950 focus-visible:ring-1 focus-visible:ring-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus-visible:border-slate-200"
         />
         <p
           className={cn(
             "text-sm transition-colors",
-            canSubmit ? "text-accent-green" : "text-slate-500"
+            canSubmit ? "text-accent-green" : "text-slate-500 dark:text-slate-500/80"
           )}
         >
           {canSubmit
@@ -87,7 +87,7 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="communicationGoal" className="text-sm font-medium text-zinc-950">
+          <Label htmlFor="communicationGoal" className="text-sm font-medium text-zinc-950 dark:text-slate-100">
             เป้าหมายการสื่อสาร
           </Label>
           <Select
@@ -97,11 +97,11 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
           >
             <SelectTrigger
               id="communicationGoal"
-              className="rounded-xl border-zinc-200 bg-white transition-colors focus:ring-zinc-950"
+              className="rounded-xl border-zinc-200 bg-white transition-colors focus:ring-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-slate-100 dark:focus:ring-slate-200"
             >
               <SelectValue placeholder="เลือกเป้าหมาย" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-zinc-200 shadow-lg">
+            <SelectContent className="rounded-xl border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-950 dark:text-slate-100">
               {COMMUNICATION_GOALS.map((goal) => (
                 <SelectItem key={goal.value} value={goal.value}>
                   {goal.label}
@@ -112,7 +112,7 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="tone" className="text-sm font-medium text-zinc-950">
+          <Label htmlFor="tone" className="text-sm font-medium text-zinc-950 dark:text-slate-100">
             โทนเสียง
           </Label>
           <Select
@@ -122,11 +122,11 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
           >
             <SelectTrigger
               id="tone"
-              className="rounded-xl border-zinc-200 bg-white transition-colors focus:ring-zinc-950"
+              className="rounded-xl border-zinc-200 bg-white transition-colors focus:ring-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-slate-100 dark:focus:ring-slate-200"
             >
               <SelectValue placeholder="เลือกโทนเสียง" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-zinc-200 shadow-lg">
+            <SelectContent className="rounded-xl border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-950 dark:text-slate-100">
               {TONE_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -143,7 +143,7 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
         className={cn(
           "mt-auto flex w-full items-center justify-center gap-2 rounded-[1.5rem] px-6 py-5 text-xl font-semibold transition-all duration-200",
           isSubmitDisabled
-            ? "cursor-not-allowed bg-zinc-200 text-zinc-400"
+            ? "cursor-not-allowed bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-slate-500"
             : "bg-zinc-950 text-white shadow-lg shadow-zinc-950/10 hover:bg-zinc-800 active:scale-[0.98]"
         )}
       >
