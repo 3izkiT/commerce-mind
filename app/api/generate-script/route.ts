@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
     // Initialize Gemini model using a shared alias or environment-configured model name
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const activeModel = process.env.GEMINI_MODEL_NAME || "gemini-pro-latest";
+    const activeModel = process.env.GEMINI_MODEL_NAME || "gemini-flash-latest";
     const model = genAI.getGenerativeModel({ model: activeModel });
 
     const systemInstruction = `

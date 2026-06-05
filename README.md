@@ -1,6 +1,8 @@
-# CommerceMind.ai
+# คิดคำขาย.com
 
 AI-powered short-form video script generator for Thai merchants and creators. Generate Hook + Body scripts from product details, view the Hook for free, and unlock the full Body via PromptPay (29 THB).
+
+> Package name remains `commerce-mind` for technical compatibility.
 
 ## Tech Stack
 

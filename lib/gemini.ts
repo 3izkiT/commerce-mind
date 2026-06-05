@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { buildUserPrompt, SYSTEM_PROMPT } from "./prompts";
 
-const MODEL = process.env.GEMINI_MODEL_NAME || "gemini-pro-latest";
+const MODEL = process.env.GEMINI_MODEL_NAME || "gemini-flash-latest";
 
 let client: GoogleGenerativeAI | null = null;
 

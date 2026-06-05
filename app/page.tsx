@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 import { ScriptForm, type ScriptFormData } from "@/components/script-form";
 import { ScriptOutput, type ScriptData } from "@/components/script-output";
 
@@ -17,8 +18,31 @@ export default function Home() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [pollStatus, setPollStatus] = useState<string | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const paymentStartRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("commerce-mind-theme");
+    const initialTheme =
+      savedTheme === "dark"
+        ? "dark"
+        : savedTheme === "light"
+        ? "light"
+        : window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+
+    setTheme(initialTheme);
+    document.documentElement.classList.toggle("dark", initialTheme === "dark");
+  }, []);
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    window.localStorage.setItem("commerce-mind-theme", nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+  };
 
   const clearPolling = useCallback(() => {
     if (pollRef.current) {
@@ -60,9 +84,7 @@ export default function Home() {
       const json = await parseJsonResponse(res);
 
       if (!res.ok) {
-        throw new Error(
-          json?.error ?? "เกิดข้อผิดพลาดในการเจนสคริปต์"
-        );
+        throw new Error(json?.error ?? "เกิดข้อผิดพลาดในการเจนสคริปต์");
       }
 
       setScript(json.data);
@@ -149,40 +171,51 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#FAFAFA] text-zinc-950">
-      <header className="shrink-0 border-b border-zinc-200/80 bg-white/95 px-6 py-5 backdrop-blur-xl lg:px-10">
+    <div className="flex min-h-screen flex-col bg-background text-foreground transition-colors duration-300">
+      <header className="shrink-0 border-b border-zinc-200/80 bg-white/95 px-6 py-5 backdrop-blur-xl transition-colors duration-300 dark:border-zinc-800/80 dark:bg-slate-950/95 lg:px-10">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-950 shadow-lg shadow-zinc-950/5">
-              <span className="text-base font-black uppercase tracking-[0.25em] text-white">ค</span>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-950 shadow-lg shadow-zinc-950/5 dark:bg-zinc-100 dark:shadow-black/10">
+              <span className="text-base font-black uppercase tracking-[0.25em] text-white dark:text-zinc-950">ค</span>
             </div>
             <div>
-              <h1 className="text-lg font-semibold tracking-tight text-zinc-950">
+              <h1 className="text-lg font-semibold tracking-tight text-zinc-950 dark:text-slate-100">
                 คิดคำขาย.com
               </h1>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 ระบบจับคู่บริบทพาณิชย์และจิตวิทยาการขาย
               </p>
             </div>
           </div>
-          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm">
-            29 บาท/ครั้ง
-          </span>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleToggleTheme}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-zinc-200 bg-white/90 text-zinc-950 shadow-sm transition-all duration-200 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900/90 dark:text-slate-100 dark:hover:bg-zinc-800"
+              aria-label="Toggle dark mode"
+            >
+              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+            <span className="rounded-full border border-zinc-200 bg-zinc-100 px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/70 dark:text-slate-300">
+              29 บาท/ครั้ง
+            </span>
+          </div>
         </div>
       </header>
 
       {error && (
-        <div className="mx-6 mt-4 rounded-3xl border border-red-100 bg-red-50/80 px-4 py-4 text-sm text-red-600 lg:mx-10">
+        <div className="mx-6 mt-4 rounded-3xl border border-red-100 bg-red-50/80 px-4 py-4 text-sm text-red-600 dark:border-red-700 dark:bg-red-900/80 dark:text-red-200 lg:mx-10">
           {error}
         </div>
       )}
 
       <main className="flex flex-1 flex-col gap-6 px-6 py-8 lg:grid lg:grid-cols-[minmax(360px,0.5fr)_minmax(360px,0.5fr)] lg:gap-8 lg:px-10 xl:px-12 xl:py-10">
-        <section className="flex flex-col rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+        <section className="flex flex-col rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)] transition-colors duration-300 dark:border-zinc-800 dark:bg-slate-950/95 dark:shadow-[0_24px_80px_rgba(0,0,0,0.25)]">
           <ScriptForm onSubmit={handleGenerate} loading={loading} />
         </section>
 
-        <section className="flex flex-col rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+        <section className="flex flex-col rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)] transition-colors duration-300 dark:border-zinc-800 dark:bg-slate-950/95 dark:shadow-[0_24px_80px_rgba(0,0,0,0.25)]">
           <ScriptOutput
             script={script}
             loading={loading}
@@ -196,7 +229,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="shrink-0 border-t border-zinc-200/80 bg-white/80 px-6 py-4 text-center text-xs text-slate-400 backdrop-blur-xl">
+      <footer className="shrink-0 border-t border-zinc-200/80 bg-white/80 px-6 py-4 text-center text-xs text-slate-400 backdrop-blur-xl transition-colors duration-300 dark:border-zinc-800/80 dark:bg-slate-950/80 dark:text-slate-500">
         คิดคำขาย.com — Stateless AI Script Generator
       </footer>
     </div>

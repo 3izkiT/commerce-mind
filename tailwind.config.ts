@@ -40,6 +40,12 @@ const config: Config = {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        "accent-blue": "#3B82F6",
+        "accent-green": "#22C55E",
+        zinc: {
+          950: "#09090B",
+          200: "#E4E4E7",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -47,8 +53,26 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        sans: [
+          "var(--font-inter)",
+          "var(--font-noto-sans-thai)",
+          "system-ui",
+          "sans-serif",
+        ],
+      },
+      keyframes: {
+        "toast-in": {
+          from: { opacity: "0", transform: "translateY(8px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "toast-out": {
+          from: { opacity: "1", transform: "translateY(0)" },
+          to: { opacity: "0", transform: "translateY(8px)" },
+        },
+      },
+      animation: {
+        "toast-in": "toast-in 200ms ease-out forwards",
+        "toast-out": "toast-out 200ms ease-in forwards",
       },
     },
   },

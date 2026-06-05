@@ -27,6 +27,28 @@
     --accent-blue: 217 91% 60%;
     --accent-green: 142 71% 45%;
   }
+
+  .dark {
+    --background: 217 16% 12%;
+    --foreground: 210 20% 96%;
+    --card: 220 18% 12%;
+    --card-foreground: 210 20% 96%;
+    --popover: 220 18% 12%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 210 20% 96%;
+    --primary-foreground: 217 16% 12%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 210 20% 72%;
+    --accent: 214 100% 57%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 14% 24%;
+    --input: 220 14% 18%;
+    --ring: 217 91% 60%;
+  }
 }
 
 @layer base {
@@ -37,9 +59,12 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-[#FAFAFA] text-[#09090B] antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: Inter, "Noto Sans Thai", "Sukhumvit Set", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
