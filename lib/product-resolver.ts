@@ -65,7 +65,7 @@ function pushUnique(parts: string[], line: string) {
   parts.push(normalized);
 }
 
-function extractFromJsonLd($: cheerio.CheerioAPI, parts: string[]) {
+function extractFromJsonLd($: cheerio.Root, parts: string[]) {
   $('script[type="application/ld+json"]').each((_, el) => {
     const raw = $(el).html();
     if (!raw) return;
