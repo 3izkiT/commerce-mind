@@ -54,9 +54,10 @@ export async function POST(request: Request) {
       }
     }
 
-    // Initialize Gemini with latest stable model
+    // Initialize Gemini model using a shared alias or environment-configured model name
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-latest" });
+    const activeModel = process.env.GEMINI_MODEL_NAME || "gemini-pro-latest";
+    const model = genAI.getGenerativeModel({ model: activeModel });
 
     const systemInstruction = `
 คุณคือผู้เชี่ยวชาญสคริปต์วิดีโอสั้นขายของสำหรับแม่ค้า/ครีเอเตอร์ไทยบน TikTok, Reels, Shorts
