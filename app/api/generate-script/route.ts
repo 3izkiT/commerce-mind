@@ -54,10 +54,12 @@ export async function POST(request: Request) {
       }
     }
 
-    // Initialize Gemini model using a shared alias or environment-configured model name
+    // Initialize Gemini client and attempt premium -> free fallback when necessary
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const activeModel = process.env.GEMINI_MODEL_NAME || "gemini-flash-latest";
-    const model = genAI.getGenerativeModel({ model: activeModel });
+
+    // Allow overriding model names via env, otherwise sensible defaults
+    const PREMIUM_MODEL = process.env.GEMINI_PREMIUM_MODEL || process.env.GEMINI_MODEL_NAME || "gemini-pro-latest";
+    const FREE_MODEL = process.env.GEMINI_FREE_MODEL || "gemini-flash-latest";
 
     const systemInstruction = `
 คุณคือผู้เชี่ยวชาญสคริปต์วิดีโอสั้นขายของสำหรับแม่ค้า/ครีเอเตอร์ไทยบน TikTok, Reels, Shorts
@@ -87,11 +89,26 @@ ${resolved.text}
 
 ตอบเป็น JSON เท่านั้น: {"hook": "...", "body_content": "..."}`;
 
-    const result = await model.generateContent(
-      systemInstruction + "\n\n" + userPrompt
-    );
+    let responseText = "";
 
-    const responseText = result.response.text();
+    // Try premium model first for best quality; fall back to free flash model on failure.
+    try {
+      console.log(`Trying premium model: ${PREMIUM_MODEL}`);
+      const premium = genAI.getGenerativeModel({ model: PREMIUM_MODEL });
+      const res = await premium.generateContent(systemInstruction + "\n\n" + userPrompt);
+      responseText = res.response.text();
+    } catch (premiumErr) {
+      console.warn("Premium model failed or unavailable:", (premiumErr as any)?.message || premiumErr);
+      try {
+        console.log(`Falling back to free model: ${FREE_MODEL}`);
+        const free = genAI.getGenerativeModel({ model: FREE_MODEL });
+        const res = await free.generateContent(systemInstruction + "\n\n" + userPrompt);
+        responseText = res.response.text();
+      } catch (freeErr) {
+        console.error("Both premium and free Gemini models failed:", (freeErr as any)?.message || freeErr);
+        throw freeErr;
+      }
+    }
 
     // Clean markdown code blocks if AI accidentally includes them
     const cleanJsonString = responseText
