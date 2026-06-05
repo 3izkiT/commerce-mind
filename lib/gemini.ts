@@ -36,8 +36,12 @@ export async function generateScript(
     },
   });
 
+  const promptInput = sourceUrl
+    ? `${productDetails}\n(ข้อมูลสินค้าดึงมาจากลิงก์: ${sourceUrl})`
+    : productDetails;
+
   const result = await model.generateContent(
-    buildUserPrompt(productDetails, communicationGoal, tone, sourceUrl)
+    buildUserPrompt(promptInput, communicationGoal, tone)
   );
 
   const text = result.response.text();
