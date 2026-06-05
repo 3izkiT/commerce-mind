@@ -1,21 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const notoSansThai = Noto_Sans_Thai({
+  variable: "--font-noto-sans-thai",
+  subsets: ["thai", "latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "CommerceMind.ai — สร้างสคริปต์ขายของด้วย AI",
+  title: "คิดคำขาย.com — สร้างสคริปต์ขายของด้วย AI",
   description:
-    "เครื่องมือ AI สำหรับแม่ค้าและครีเอเตอร์ไทย สร้างสคริปต์วิดีโอสั้น Hook + Body ภายในไม่กี่วินาที",
+    "ระบบจับคู่บริบทพาณิชย์และจิตวิทยาการขาย — เครื่องมือ AI สำหรับแม่ค้าและครีเอเตอร์ไทย สร้างสคริปต์วิดีโอสั้น Hook + Body ภายในไม่กี่วินาที",
+  icons: [
+    { rel: "icon", url: "/favicon.svg", type: "image/svg+xml" },
+    { rel: "apple-touch-icon", url: "/favicon.svg" },
+  ],
 };
 
 export default function RootLayout({
@@ -26,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen font-sans`}
+        className={`${inter.variable} ${notoSansThai.variable} min-h-screen font-sans`}
       >
         {children}
       </body>
