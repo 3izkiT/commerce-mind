@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isValidProductInput } from "@/lib/product-input";
 import { getClientIp, getRateLimiter, isRateLimitConfigured } from "@/lib/ratelimit";
 
 export async function middleware(request: NextRequest) {
@@ -7,20 +8,34 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const body = await request.clone().json().catch(() => null);
+  let body: unknown;
+  try {
+    body = await request.clone().json();
+  } catch {
+    body = null;
+  }
 
-  if (!body || typeof body.productDetails !== "string") {
+  if (!body || typeof body !== "object" || !("productDetails" in body)) {
     return NextResponse.json(
       { success: false, error: "Invalid payload: productDetails is required" },
       { status: 400 }
     );
   }
 
-  if (body.productDetails.trim().length < 10) {
+  const payload = body as Record<string, unknown>;
+  if (typeof payload.productDetails !== "string") {
+    return NextResponse.json(
+      { success: false, error: "Invalid payload: productDetails must be a string" },
+      { status: 400 }
+    );
+  }
+
+  if (!isValidProductInput(payload.productDetails)) {
     return NextResponse.json(
       {
         success: false,
-        error: "productDetails must be at least 10 characters",
+        error:
+          "กรุณาวางลิงก์สินค้าที่ถูกต้อง หรือพิมพ์รายละเอียดอย่างน้อย 10 ตัวอักษร",
       },
       { status: 400 }
     );
@@ -30,24 +45,29 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const ratelimit = getRateLimiter();
-  if (!ratelimit) {
+  try {
+    const ratelimit = getRateLimiter();
+    if (!ratelimit) {
+      return NextResponse.next();
+    }
+
+    const ip = getClientIp(request);
+    const { success, reset } = await ratelimit.limit(ip);
+
+    if (!success) {
+      const resetDate = new Date(reset);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "คุณใช้สิทธิ์เจนฟรีครบแล้ว กรุณาลองใหม่ใน 24 ชั่วโมง",
+          resetAt: resetDate.toISOString(),
+        },
+        { status: 429 }
+      );
+    }
+  } catch (err) {
+    console.error("Rate limit check failed:", err);
     return NextResponse.next();
-  }
-
-  const ip = getClientIp(request);
-  const { success, reset } = await ratelimit.limit(ip);
-
-  if (!success) {
-    const resetDate = new Date(reset);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "คุณใช้สิทธิ์เจนฟรีครบแล้ว กรุณาลองใหม่ใน 24 ชั่วโมง",
-        resetAt: resetDate.toISOString(),
-      },
-      { status: 429 }
-    );
   }
 
   return NextResponse.next();
