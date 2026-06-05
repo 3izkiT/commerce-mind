@@ -28,26 +28,18 @@ export async function generateScript(
   sourceUrl?: string
 ): Promise<ScriptResult> {
   const genAI = getClient();
-  const model = genAI.getGenerativeModel(
-    {
-      model: MODEL,
-      systemInstruction: SYSTEM_PROMPT,
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
-    },
-    {
-      apiVersion: "v1",
-    }
-  );
+  const model = genAI.getGenerativeModel({
+    model: MODEL,
+  });
 
   const promptInput = sourceUrl
     ? `${productDetails}\n(ข้อมูลสินค้าดึงมาจากลิงก์: ${sourceUrl})`
     : productDetails;
 
-  const result = await model.generateContent(
-    buildUserPrompt(promptInput, communicationGoal, tone)
-  );
+  // Combine system prompt and user prompt into a single text
+  const fullPrompt = `${SYSTEM_PROMPT}\n\n${buildUserPrompt(promptInput, communicationGoal, tone)}`;
+
+  const result = await model.generateContent(fullPrompt);
 
   const text = result.response.text();
   const parsed = JSON.parse(text) as ScriptResult;
