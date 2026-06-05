@@ -31,6 +31,15 @@ export default function Home() {
     return () => clearPolling();
   }, [clearPolling]);
 
+  const parseJsonResponse = async (response: Response) => {
+    const text = await response.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { error: text || response.statusText || "เกิดข้อผิดพลาด" };
+    }
+  };
+
   const handleGenerate = async (data: ScriptFormData) => {
     setLoading(true);
     setError(null);
@@ -48,10 +57,12 @@ export default function Home() {
         body: JSON.stringify(data),
       });
 
-      const json = await res.json();
+      const json = await parseJsonResponse(res);
 
       if (!res.ok) {
-        throw new Error(json.error ?? "เกิดข้อผิดพลาดในการเจนสคริปต์");
+        throw new Error(
+          json?.error ?? "เกิดข้อผิดพลาดในการเจนสคริปต์"
+        );
       }
 
       setScript(json.data);
@@ -121,7 +132,7 @@ export default function Home() {
         body: JSON.stringify({ packageType: "single" }),
       });
 
-      const json = await res.json();
+      const json = await parseJsonResponse(res);
 
       if (!res.ok) {
         throw new Error(json.error ?? "สร้าง QR ไม่สำเร็จ");
@@ -138,50 +149,55 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="border-b border-slate-100 px-6 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
-              CommerceMind.ai
-            </h1>
-            <p className="text-xs text-slate-500">สมองพาณิชย์ — คิดคำขายด้วย AI</p>
+    <div className="flex min-h-screen flex-col bg-[#FAFAFA] text-zinc-950">
+      <header className="shrink-0 border-b border-zinc-200/80 bg-white/95 px-6 py-5 backdrop-blur-xl lg:px-10">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-950 shadow-lg shadow-zinc-950/5">
+              <span className="text-base font-black uppercase tracking-[0.25em] text-white">ค</span>
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight text-zinc-950">
+                คิดคำขาย.com
+              </h1>
+              <p className="text-xs text-slate-500">
+                ระบบจับคู่บริบทพาณิชย์และจิตวิทยาการขาย
+              </p>
+            </div>
           </div>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-4 py-2 text-xs font-semibold text-slate-500 shadow-sm">
             29 บาท/ครั้ง
           </span>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <div className="grid min-h-[calc(100vh-12rem)] grid-cols-1 gap-8 lg:grid-cols-2">
-          <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-            <ScriptForm onSubmit={handleGenerate} loading={loading} />
-          </section>
-
-          <section className="rounded-xl border border-slate-100 bg-white p-6 shadow-sm">
-            <ScriptOutput
-              script={script}
-              loading={loading}
-              isPaid={isPaid}
-              qrImageUrl={qrImageUrl}
-              paymentLoading={paymentLoading}
-              paymentError={paymentError}
-              onUnlock={handleUnlock}
-              pollStatus={pollStatus}
-            />
-          </section>
+      {error && (
+        <div className="mx-6 mt-4 rounded-3xl border border-red-100 bg-red-50/80 px-4 py-4 text-sm text-red-600 lg:mx-10">
+          {error}
         </div>
+      )}
+
+      <main className="flex flex-1 flex-col gap-6 px-6 py-8 lg:grid lg:grid-cols-[minmax(360px,0.5fr)_minmax(360px,0.5fr)] lg:gap-8 lg:px-10 xl:px-12 xl:py-10">
+        <section className="flex flex-col rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+          <ScriptForm onSubmit={handleGenerate} loading={loading} />
+        </section>
+
+        <section className="flex flex-col rounded-[2rem] border border-zinc-200 bg-white/95 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+          <ScriptOutput
+            script={script}
+            loading={loading}
+            isPaid={isPaid}
+            qrImageUrl={qrImageUrl}
+            paymentLoading={paymentLoading}
+            paymentError={paymentError}
+            onUnlock={handleUnlock}
+            pollStatus={pollStatus}
+          />
+        </section>
       </main>
 
-      <footer className="border-t border-slate-100 px-6 py-4 text-center text-xs text-slate-400">
-        CommerceMind.ai — Stateless AI Script Generator
+      <footer className="shrink-0 border-t border-zinc-200/80 bg-white/80 px-6 py-4 text-center text-xs text-slate-400 backdrop-blur-xl">
+        คิดคำขาย.com — Stateless AI Script Generator
       </footer>
     </div>
   );

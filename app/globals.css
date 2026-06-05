@@ -4,26 +4,28 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 98%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 10% 3.9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
     --radius: 0.75rem;
+    --accent-blue: 217 91% 60%;
+    --accent-green: 142 71% 45%;
   }
 }
 
@@ -31,7 +33,176 @@
   * {
     @apply border-border;
   }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-[#FAFAFA] text-[#09090B] antialiased;
+    font-family: Inter, "Noto Sans Thai", "Sukhumvit Set", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .typewriter-reveal {
+    animation: typewriter-reveal 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .typewriter-reveal-delay-1 {
+    animation-delay: 0.15s;
+  }
+
+  .typewriter-reveal-delay-2 {
+    animation-delay: 0.3s;
+  }
+
+  .typewriter-reveal-delay-3 {
+    animation-delay: 0.45s;
+  }
+
+  .paywall-enter {
+    animation: paywall-enter 220ms ease-out forwards;
+  }
+
+  .paywall-enter {
+    animation: paywall-enter 220ms ease-out forwards;
+  }
+
+  .paywall-exit {
+    animation: paywall-exit 200ms ease-out forwards;
+  }
+
+  .glass-melt {
+    animation: glass-melt 320ms ease-out forwards;
+  }
+
+  .body-unlock {
+    animation: body-slide-up 400ms ease-out forwards;
+  }
+
+  .qr-frame-pulse::before,
+  .qr-frame-pulse::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: #09090B;
+    border-style: solid;
+    animation: corner-pulse 2s ease-in-out infinite;
+  }
+
+  .qr-frame-pulse::before {
+    top: -2px;
+    left: -2px;
+    border-width: 2px 0 0 2px;
+    border-radius: 4px 0 0 0;
+  }
+
+  .qr-frame-pulse::after {
+    bottom: -2px;
+    right: -2px;
+    border-width: 0 2px 2px 0;
+    border-radius: 0 0 4px 0;
+    animation-delay: 1s;
+  }
+
+  .qr-frame-pulse .corner-tr,
+  .qr-frame-pulse .corner-bl {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: #09090B;
+    border-style: solid;
+    animation: corner-pulse 2s ease-in-out infinite;
+  }
+
+  .qr-frame-pulse .corner-tr {
+    top: -2px;
+    right: -2px;
+    border-width: 2px 2px 0 0;
+    border-radius: 0 4px 0 0;
+    animation-delay: 0.5s;
+  }
+
+  .qr-frame-pulse .corner-bl {
+    bottom: -2px;
+    left: -2px;
+    border-width: 0 0 2px 2px;
+    border-radius: 0 0 0 4px;
+    animation-delay: 1.5s;
+  }
+}
+
+@keyframes typewriter-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes paywall-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes paywall-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes glass-melt {
+  from {
+    background-color: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(18px);
+  }
+  to {
+    background-color: transparent;
+    backdrop-filter: blur(0);
+  }
+}
+
+@keyframes body-slide-up {
+  from {
+    opacity: 0.6;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes corner-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes spin-blue {
+  to {
+    transform: rotate(360deg);
   }
 }
