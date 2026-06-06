@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { isProductUrl, isValidProductInput } from "@/lib/product-input";
-import { resolveProductInput } from "@/lib/product-resolver";
-
-const SCRAPE_ERROR_TH =
-  "ไม่สามารถดึงข้อมูลจากลิงก์ได้ กรุณาพิมพ์รายละเอียดสินค้าแทน";
 
 export async function POST(request: Request) {
   try {
@@ -21,12 +17,23 @@ export async function POST(request: Request) {
     const communicationGoal = body.communicationGoal ?? "conversion";
     const tone = body.tone ?? "urgent";
 
+    if (isProductUrl(productDetails)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "กรุณาพิมพ์ชื่อสินค้าและจุดเด่นแทนการวางลิงก์ เช่น: พัดลมพกพามินิมอล, ลมแรง 3 ระดับ, แบต 10 ชม.",
+        },
+        { status: 400 }
+      );
+    }
+
     if (!isValidProductInput(productDetails)) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "กรุณาวางลิงก์สินค้าที่ถูกต้อง หรือพิมพ์รายละเอียดอย่างน้อย 10 ตัวอักษร",
+            "กรุณาพิมพ์ชื่อสินค้าและจุดเด่นอย่างน้อย 10 ตัวอักษร (ไม่รับลิงก์)",
         },
         { status: 400 }
       );
@@ -39,75 +46,83 @@ export async function POST(request: Request) {
       );
     }
 
-    let resolved;
-    try {
-      resolved = await resolveProductInput(productDetails);
-    } catch (error) {
-      console.error("Product resolve error:", error);
-      if (isProductUrl(productDetails)) {
-        resolved = { text: productDetails, source: "url", originalUrl: productDetails };
-      } else {
-        return NextResponse.json(
-          { success: false, error: SCRAPE_ERROR_TH },
-          { status: 422 }
-        );
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+    const DEFAULT_MODEL_PRIORITY = [
+      process.env.GEMINI_PREMIUM_MODEL || process.env.GEMINI_MODEL_NAME || "gemini-pro-latest",
+      process.env.GEMINI_FREE_MODEL || "gemini-flash-latest",
+    ];
+
+    const MODEL_PRIORITY = process.env.GEMINI_MODEL_PRIORITY
+      ? process.env.GEMINI_MODEL_PRIORITY.split(",").map((name) => name.trim()).filter(Boolean)
+      : DEFAULT_MODEL_PRIORITY;
+
+    const safeModelPriority = Array.from(new Set(MODEL_PRIORITY));
+
+    const systemInstruction = `
+  คุณคือผู้เชี่ยวชาญด้านการเขียนสคริปต์ปิดการขายและนักจิตวิทยาการพาณิชย์ดิจิทัลในไทย
+  หน้าที่ของคุณคือ นำข้อความ "รายละเอียดสินค้าดิบ" ที่ลูกค้าพิมพ์ป้อนเข้ามา นำมาขยี้จุดขายทำเป็นสคริปต์พูด 1 นาที
+  
+  [กฎเหล็กในการประมวลผล]
+  1. ห้ามมโนหรือเดาสินค้าไปเป็นประเภทอื่นเด็ดขาด ให้ยึดตามตัวหนังสือชื่อสินค้าที่ลูกค้าพิมพ์มาเท่านั้น
+  2. สกัดเอา "จุดเด่นสินค้า" และ "ปัญหาของกลุ่มเป้าหมาย" มาเขียนเป็นประโยคเปิดหัว (Hook) ให้คมกริบและสั้นกระชับ
+  3. body_content ต้องมี [วงเล็บกำกับท่าทาง/การแสดง] เช่น [หยิบสินค้าขึ้นโชว์ใกล้กล้อง] [ชี้ที่จุดเด่น] [ยิ้มมองกล้อง]
+  4. ใช้ภาษาพูดแม่ค้าตลาดนัด ห้ามภาษาเขียน ห้ามคำเกริ่นนำ เช่น "สวัสดีค่ะวันนี้มาแนะนำ"
+  5. ปลายทางต้องส่งกลับมาเป็นโครงสร้าง JSON Object เท่านั้น ห้ามมีคำเกริ่น ห้ามมีข้อความขยะนอกปีกกา
+  
+  โครงสร้างบังคับ: { "hook": "ข้อความ", "body_content": "ข้อความ", "caption_and_hashtags": "ข้อความ" }
+`;
+
+    const userPrompt = `สร้างสคริปต์จากรายละเอียดสินค้าดิบนี้:
+
+${productDetails}
+
+เป้าหมายการสื่อสาร: ${communicationGoal}
+โทนเสียง: ${tone}
+
+ตอบเป็น JSON เท่านั้น: { "hook": "...", "body_content": "...", "caption_and_hashtags": "..." }`;
+
+    let responseText = "";
+    let usedModel = "";
+    const attemptedModels: string[] = [];
+    let lastError: unknown = null;
+
+    async function generateWithRetry(modelName: string, promptText: string) {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const maxAttempts = 2;
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        try {
+          const result = await model.generateContent(promptText);
+          return result.response.text();
+        } catch (err) {
+          lastError = err;
+          if (attempt < maxAttempts) {
+            const backoffMs = attempt * 400;
+            console.warn(
+              `Model ${modelName} attempt ${attempt} failed, retrying in ${backoffMs}ms...`,
+              (err as any)?.message || err
+            );
+            await new Promise((resolve) => setTimeout(resolve, backoffMs));
+          }
+        }
+      }
+      throw lastError;
+    }
+
+    for (const modelName of safeModelPriority) {
+      attemptedModels.push(modelName);
+      try {
+        console.log(`Trying model: ${modelName}`);
+        responseText = await generateWithRetry(modelName, systemInstruction + "\n\n" + userPrompt);
+        usedModel = modelName;
+        break;
+      } catch (modelErr) {
+        console.warn(`Model ${modelName} failed, trying next model if available...`, (modelErr as any)?.message || modelErr);
       }
     }
 
-    // Initialize Gemini client and attempt premium -> free fallback when necessary
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-    // Allow overriding model names via env, otherwise sensible defaults
-    const PREMIUM_MODEL = process.env.GEMINI_PREMIUM_MODEL || process.env.GEMINI_MODEL_NAME || "gemini-pro-latest";
-    const FREE_MODEL = process.env.GEMINI_FREE_MODEL || "gemini-flash-latest";
-
-    const systemInstruction = `
-คุณคือผู้เชี่ยวชาญสคริปต์วิดีโอสั้นขายของสำหรับแม่ค้า/ครีเอเตอร์ไทยบน TikTok, Reels, Shorts
-
-กฎสำคัญ:
-1. ตอบเป็น JSON เท่านั้น ไม่มี markdown ไม่มีคำอธิบายเพิ่ม
-2. รูปแบบ: {"hook": "...", "body_content": "..."}
-3. ใช้ภาษาพูดแม่ค้าตลาดนัด ห้ามภาษาเขียน ห้ามคำเกริ่นนำ เช่น "สวัสดีค่ะวันนี้มาแนะนำ"
-4. hook: ประโยคเปิดที่ดึงดูดความสนใจใน 3 วินาทีแรก สั้น กระชับ ตรงประเด็น
-5. body_content: เนื้อหาหลักสคริปต์ ต้องมี [วงเล็บกำกับท่าทาง/การแสดง] เช่น [หยิบสินค้าขึ้นโชว์ใกล้กล้อง] [ชี้ที่จุดเด่น] [ยิ้มมองกล้อง]
-6. โทนเสียง 3 แบบ:
-   - สายตะโกนเร่งรีบ: ใช้คำเร่งด่วน สร้าง FOMO กระตุ้นให้รีบซื้อ
-   - สายป้ายยาเนียนๆ: แนะนำเหมือนเพื่อน ไม่ขายตรง เน้นประสบการณ์จริง
-   - สายฮาตลกร้าย: ใส่อารมณ์ขัน มุกตลก แต่ยังขายของได้
-7. เน้นประโยชน์สินค้า จุดเด่น ราคา โปรโม ตามข้อมูลที่ได้รับ
-8. ความยาว hook ไม่เกิน 2 ประโยค, body_content ประมาณ 150-300 คำ
-`;
-
-    const userPrompt = `สร้างสคริปต์วิดีโอสั้นขายของจากข้อมูลนี้:
-
-รายละเอียดสินค้า:
-${resolved.text}
-
-เป้าหมายการสื่อสาร: ${communicationGoal}
-
-โทนเสียง: ${tone}
-
-ตอบเป็น JSON เท่านั้น: {"hook": "...", "body_content": "..."}`;
-
-    let responseText = "";
-
-    // Try premium model first for best quality; fall back to free flash model on failure.
-    try {
-      console.log(`Trying premium model: ${PREMIUM_MODEL}`);
-      const premium = genAI.getGenerativeModel({ model: PREMIUM_MODEL });
-      const res = await premium.generateContent(systemInstruction + "\n\n" + userPrompt);
-      responseText = res.response.text();
-    } catch (premiumErr) {
-      console.warn("Premium model failed or unavailable:", (premiumErr as any)?.message || premiumErr);
-      try {
-        console.log(`Falling back to free model: ${FREE_MODEL}`);
-        const free = genAI.getGenerativeModel({ model: FREE_MODEL });
-        const res = await free.generateContent(systemInstruction + "\n\n" + userPrompt);
-        responseText = res.response.text();
-      } catch (freeErr) {
-        console.error("Both premium and free Gemini models failed:", (freeErr as any)?.message || freeErr);
-        throw freeErr;
-      }
+    if (!responseText) {
+      throw lastError ?? new Error("Failed to generate script from any configured Gemini model");
     }
 
     // Clean markdown code blocks if AI accidentally includes them
@@ -125,7 +140,12 @@ ${resolved.text}
       );
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({
+      success: true,
+      data,
+      usedModel,
+      attemptedModels,
+    });
   } catch (error) {
     console.error("Generate script error:", error);
 

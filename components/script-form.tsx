@@ -69,7 +69,7 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
           name="productDetails"
           value={productDetails}
           onChange={(e) => setProductDetails(e.target.value)}
-          placeholder="วางลิงก์สินค้า (TikTok Shop / Shopee) หรือพิมพ์รายละเอียดจุดเด่นสินค้าได้ในช่องเดียวกัน"
+          placeholder="พิมพ์ชื่อสินค้า + จุดเด่นสั้น ๆ ได้เลย เช่น: พัดลมพกพามินิมอล, ลมแรงสะใจปรับได้ 3 ระดับ, แบตอึด 10 ชั่วโมง ชาร์จ USB ได้, น้ำหนักเบาพกไปคอนเสิร์ตสบาย"
           disabled={loading || disabled}
           className="min-h-[200px] resize-none rounded-[1.75rem] border-zinc-200 bg-white px-4 py-4 text-base leading-7 text-zinc-950 transition-colors duration-200 focus-visible:border-zinc-950 focus-visible:ring-1 focus-visible:ring-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus-visible:border-slate-200"
         />
@@ -81,7 +81,7 @@ export function ScriptForm({ onSubmit, loading, disabled }: ScriptFormProps) {
         >
           {canSubmit
             ? `${productDetails.trim().length} ตัวอักษร — พร้อมเสกสคริปต์`
-            : "วางลิงก์สินค้า หรือพิมพ์รายละเอียดจุดเด่นของสินค้าอย่างน้อย 10 ตัวอักษร"}
+            : "พิมพ์ชื่อสินค้า + จุดเด่นอย่างน้อย 10 ตัวอักษร (ไม่รับลิงก์)"}
         </p>
       </div>
 

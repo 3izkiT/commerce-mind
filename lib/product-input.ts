@@ -11,12 +11,7 @@ export function isValidProductInput(input: string): boolean {
   if (!trimmed) return false;
 
   if (isProductUrl(trimmed)) {
-    try {
-      new URL(trimmed);
-      return trimmed.length >= MIN_URL_LENGTH;
-    } catch {
-      return false;
-    }
+    return false;
   }
 
   return trimmed.length >= MIN_TEXT_LENGTH;
